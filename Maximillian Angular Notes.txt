@@ -1,0 +1,154 @@
+
+Create new Project :
+	ng new my-first-app
+
+Run newly created project :
+	cd my-first-app
+	ng serve
+
+Add Bootstrap : 
+	npm install --save bootstrap@3
+	in angular.json -> in styles array add "node_modules/bootstrap/dist/css/bootstrap.min.css" before "src/styles.css"
+	
+index.html is the html served
+main.ts is the first script executed bootstraps an angular application and is passed AppModule
+AppModule i tell it in the bootstrap field the components that index.html is supposed to know at start (which is AppComponent)
+
+Create new component : 
+	Manually :
+		- create folder (ex server) and create files (ex server.component.ts & server.component.html)
+			@Component({
+				selector:'app-server'
+				templateUrl:'./server.component.html'
+			})
+			export class ServerComponent{
+			}
+		- register component in the AppModule in the declarations array and importing it 
+		
+	CLI Command :
+		- ng generate component hero-detail
+		- The command scaffolds the following:
+
+			Creates a directory src/app/hero-detail.
+			Inside that directory, four files are created:
+
+			A CSS file for the component styles.
+			An HTML file for the component template.
+			A TypeScript file with a component class named HeroDetailComponent.
+			A test file for the HeroDetailComponent class.
+
+			The command also adds the HeroDetailComponent as a declaration in the @NgModule decorator of the src/app/app.module.ts file.
+
+Data binding : 
+	- communication between typescript class and html template
+	- String interpolation : {{ varNameInClass }}
+		* any expression that can be resolved to a string
+		* in a property "{{ varNameInClass }}"
+	- property binding : [property]="data" 
+		* ex : [disabled]="disabledVar"
+	- Event binding : (event)="expression"
+		* ex : (click)="onClickFnName($event)"
+	- Two way binding : [(ngModel)]="expression"
+		* For Two-Way-Binding (covered in the next lecture) to work, you need to enable the ngModel  directive. This is done by adding the FormsModule  to the imports[]  array in the AppModule.
+		You then also need to add the import from @angular/forms  in the app.module.ts file:
+		import { FormsModule } from '@angular/forms'; 
+		* [(ngModel)]="varNameInClass"
+		
+Directives :
+	- *ngIf
+		ex : 	<p *ngIf="booleanValue; else name">this will render if if condition is true</p> 
+				<ng-template #name><p>this will render in else</p></ng-template>
+	- ngStyle
+		ex :	<p [ngStyle]="{backgroundcolor:getcolor()}"></p>
+	- ngClass
+		ex : 	<p [ngClass]="{className : condition}"></p>
+	- ngFor
+		ex : 	<p *ngFor="let item of list; let i = index">item.name</p>
+
+
+Custom property binding (passing data between components) :
+	Parent html :
+		<child-component  *ngFor="let item of list [VarNameInChildClass]="item"></child-component>
+	Child ts class :
+		@Input() VarNameInChildClass : {name:string, content:string} 
+		
+Custom event binding : 
+	Parent ts class :
+		methodName(obj{name:string, content:string}){console.log("hi");}
+	Parent html :
+		<child-component (nameToUseInChild)="methodName($event)" ></child-component>
+	Child ts class :
+		@Output() nameToUseInChild = new EventEmitter<{name:string, content:string}>();
+		
+		methodNameInChildComp(){
+			this.nameToUseInChild.emit({{name:"name", content:"content"}});
+		}
+		
+Local References :
+	- used to reference another html element.
+	- u can use it to get values from the input elements without binding if u need it only when the user clicks button.
+	- not advisable to change content value with these aproaches 
+	
+	Method 1 :
+		<input type="text" #localRefName>
+		<button (click)="onClickBtn(localRefName)"></button>
+		
+		onClickBtn(localRefName){
+			console.log(localRefName);  				// prints "<input type="text" #localRefName>"
+			console.log(localRefName.value);			// prints value entered in the input 
+		}
+		
+	Method 2 :
+		<input type="text" #localRefName>
+		
+		@ViewChild('localRefName', {static: true}) localRefName: ElementRef;
+		onClickBtn(){
+			console.log(localRefName);  						// prints ElementRef
+			console.log(localRefName.nativeElement);  			// prints "<input type="text" #localRefName>"
+			console.log(localRefName.nativeElement.value);		// prints value entered in the input 
+		}
+		
+	
+		
+
+Passing html in component :
+	
+	Parent html :
+		<customComponent>
+			<p>hello</P>
+		</customComponent>
+		
+	Child html : 
+		<ng-content></ng-content>			// at the place where the u want the paragraph to appear
+		
+	for Local References in the child class :
+		add #localRefName to <p #localRefName>hello</p> (this is in the parent html)
+		@ContentChild('localRefName', {static: true}) localRefName: ElementRef;
+		onClickBtn(){
+			console.log(localRefName);  						// prints ElementRef
+			console.log(localRefName.nativeElement);  			// prints "<input type="text" #localRefName>"
+			console.log(localRefName.nativeElement.value);		// prints value entered in the input 
+		}
+		
+		
+Component LifeCycle Hooks:
+	- ngOnChanges 							// called after component creation and whenever a property bound with @input changes
+		
+		ngOnChanges(changes : simpleChanges){
+			console.log(changes);									// simpleChanges object with @input variable name with currentvalue and previousValue 
+		}
+		
+	- ngOnInit								// called when the component is initialized ( after the constructor )
+	- ngDoCheck								// called whenever a change happens or something happens ( change detection cycle )
+	- ngAftedContentInit 					// called whenever ng-content happens 
+	- ngAftedContentChecked
+	- ngAfterViewInit 						// called after view of component finished initializing (once view is rendered)
+	- ngAfterViewChecked
+	- ngOnDestroy							// called when object is about to be destroyed (ex : like in ngIf if the component is false and will be removed)
+	
+	1- constructor		2- ngOnChanges		3- ngOnInit		4- ngDoCheck		5- ngAftedContentInit	6- ngAftedContentChecked	7- ngAfterViewInit		8- ngAfterViewChecked
+	
+	- @ViewChild can't be accessed until ngAfterViewInit
+
+
+
